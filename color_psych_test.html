@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>내 영혼의 색 - 테스트(데모)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* slider style (webkit) */
+    input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:18px; height:18px; border-radius:9999px; background:#111; cursor:pointer; }
+    input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:9999px; background:linear-gradient(90deg,#ef4444,#22c55e,#3b82f6); }
+    /* firefox */
+    input[type=range]{ appearance:none; height:6px; border-radius:9999px; background:linear-gradient(90deg,#ef4444,#22c55e,#3b82f6); }
+    input[type=range]::-moz-range-thumb{ width:18px; height:18px; border-radius:9999px; background:#111; border:none; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <header class="max-w-4xl mx-auto px-6 py-10">
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">내 영혼의 색 – 미니 테스트 (3문항 데모)</h1>
+    <p class="mt-3 text-slate-600">슬라이더를 움직여 지금의 당신을 가장 잘 나타내 보세요. 응답에 따라 <span class="font-semibold">고유한 HEX 색상</span>이 생성됩니다.</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 grid md:grid-cols-2 gap-8 pb-16">
+    <!-- Left: Form -->
+    <section class="space-y-8">
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl shadow p-6">
+        <label for="q1" class="block text-sm font-semibold text-slate-700">Q1. 지금 나는 <span class="text-sky-600">차분함</span> 🕊️ ↔ <span class="text-rose-600">에너지</span> 🔥</label>
+        <div class="mt-4 flex items-center gap-3">
+          <span class="text-xs text-slate-500">차분함</span>
+          <input id="q1" type="range" min="0" max="100" value="50" class="flex-1" />
+          <span class="text-xs text-slate-500">에너지</span>
+        </div>
+        <div class="mt-2 text-right text-sm text-slate-500"><span id="q1v">50</span>/100</div>
+      </div>
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl shadow p-6">
+        <label for="q2" class="block text-sm font-semibold text-slate-700">Q2. 나는 <span class="text-indigo-700">논리</span> 🔍 ↔ <span class="text-fuchsia-700">직관/창의</span> ✨</label>
+        <div class="mt-4 flex items-center gap-3">
+          <span class="text-xs text-slate-500">논리</span>
+          <input id="q2" type="range" min="0" max="100" value="50" class="flex-1" />
+          <span class="text-xs text-slate-500">직관</span>
+        </div>
+        <div class="mt-2 text-right text-sm text-slate-500"><span id="q2v">50</span>/100</div>
+      </div>
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl shadow p-6">
+        <label for="q3" class="block text-sm font-semibold text-slate-700">Q3. 사람들과 있을 때 <span class="text-emerald-700">조용함</span> 🙊 ↔ <span class="text-orange-600">활발함</span> 🎉</label>
+        <div class="mt-4 flex items-center gap-3">
+          <span class="text-xs text-slate-500">조용함</span>
+          <input id="q3" type="range" min="0" max="100" value="50" class="flex-1" />
+          <span class="text-xs text-slate-500">활발함</span>
+        </div>
+        <div class="mt-2 text-right text-sm text-slate-500"><span id="q3v">50</span>/100</div>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="resetBtn" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium shadow">초기화</button>
+        <button id="randomBtn" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-medium shadow">랜덤</button>
+      </div>
+    </section>
+
+    <!-- Right: Result -->
+    <aside class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+      <div>
+        <h2 class="text-xl font-bold">결과</h2>
+        <p class="text-slate-500 text-sm">응답에 따라 실시간으로 색상이 생성됩니다.</p>
+      </div>
+
+      <div id="swatch" class="h-48 w-full rounded-2xl shadow-inner border border-slate-200"></div>
+
+      <div class="grid grid-cols-3 gap-3 text-sm">
+        <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-xs text-slate-500">R</div><div id="rVal" class="font-semibold">0</div></div>
+        <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-xs text-slate-500">G</div><div id="gVal" class="font-semibold">0</div></div>
+        <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-xs text-slate-500">B</div><div id="bVal" class="font-semibold">0</div></div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="text-lg font-mono font-semibold" id="hex">#000000</div>
+        <button id="copyBtn" class="px-3 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-black">HEX 복사</button>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-2">성격 키워드</h3>
+        <div id="keywords" class="flex flex-wrap gap-2 text-xs"></div>
+      </div>
+
+      <p class="text-xs text-slate-500 mt-2">※ 데모는 3문항만 포함합니다. 실제 서비스에서는 10문항 이상으로 확장하고, 가중치·정규화 로직을 보정할 수 있습니다.</p>
+    </aside>
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-6 pb-12 text-center text-xs text-slate-500">© Demo – Color Psychology Test</footer>
+
+  <script>
+    const q1 = document.getElementById('q1');
+    const q2 = document.getElementById('q2');
+    const q3 = document.getElementById('q3');
+    const q1v = document.getElementById('q1v');
+    const q2v = document.getElementById('q2v');
+    const q3v = document.getElementById('q3v');
+
+    const swatch = document.getElementById('swatch');
+    const hexEl = document.getElementById('hex');
+    const rEl = document.getElementById('rVal');
+    const gEl = document.getElementById('gVal');
+    const bEl = document.getElementById('bVal');
+    const copyBtn = document.getElementById('copyBtn');
+
+    const resetBtn = document.getElementById('resetBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const keywordsEl = document.getElementById('keywords');
+
+    const clamp255 = (x) => Math.max(0, Math.min(255, x));
+    const toHex = (n) => n.toString(16).padStart(2, '0');
+
+    function computeRGB() {
+      const v1 = Number(q1.value); // calm(0) ↔ energy(100)
+      const v2 = Number(q2.value); // logic(0) ↔ intuition(100)
+      const v3 = Number(q3.value); // quiet(0) ↔ lively(100)
+
+      // Accumulate raw scores (demo weights based on 제안서)
+      let R = 0, G = 0, B = 0;
+
+      // Q1: R += v1; B += (100 - v1)
+      R += v1;
+      B += (100 - v1);
+
+      // Q2: B += (100 - v2); R += 0.5*v2; G += 0.5*v2
+      B += (100 - v2);
+      R += 0.5 * v2;
+      G += 0.5 * v2;
+
+      // Q3: G += (100 - v3); R += v3
+      G += (100 - v3);
+      R += v3;
+
+      // Normalize to 0~255 using channel-wise scaling by the max channel to preserve hue and maximize vividness
+      const maxVal = Math.max(R, G, B, 1);
+      const scale = 255 / maxVal;
+      R = Math.round(clamp255(R * scale));
+      G = Math.round(clamp255(G * scale));
+      B = Math.round(clamp255(B * scale));
+
+      return { R, G, B };
+    }
+
+    function render() {
+      q1v.textContent = q1.value; q2v.textContent = q2.value; q3v.textContent = q3.value;
+      const { R, G, B } = computeRGB();
+      const hex = `#${toHex(R)}${toHex(G)}${toHex(B)}`.toUpperCase();
+      swatch.style.backgroundColor = hex;
+      hexEl.textContent = hex;
+      rEl.textContent = R; gEl.textContent = G; bEl.textContent = B;
+
+      // keywords by channel ranking
+      const channels = [
+        { k: '에너지', v: R, alt: ['열정','도전'] },
+        { k: '안정', v: G, alt: ['균형','친화'] },
+        { k: '차분', v: B, alt: ['신뢰','사색'] },
+      ].sort((a,b)=>b.v-a.v);
+
+      keywordsEl.innerHTML = '';
+      const pills = [channels[0].k, channels[1].alt[0], channels[2].alt[1]];
+      pills.forEach(t=>{
+        const span = document.createElement('span');
+        span.className = 'px-2.5 py-1 rounded-full bg-slate-100 border text-slate-700';
+        span.textContent = t;
+        keywordsEl.appendChild(span);
+      });
+    }
+
+    [q1,q2,q3].forEach(el=> el.addEventListener('input', render));
+
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(hexEl.textContent);
+        copyBtn.textContent = '복사됨!';
+        setTimeout(()=> copyBtn.textContent = 'HEX 복사', 1200);
+      }catch(e){
+        alert('복사에 실패했어요.');
+      }
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      [q1,q2,q3].forEach(el=> el.value = 50);
+      render();
+    });
+
+    randomBtn.addEventListener('click', ()=>{
+      [q1,q2,q3].forEach(el=> el.value = Math.floor(Math.random()*101));
+      render();
+    });
+
+    // initial render
+    render();
+  </script>
+</body>
+</html>
