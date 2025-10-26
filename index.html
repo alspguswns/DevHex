@@ -1,333 +1,237 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DevHex – 내 영혼의 색 (10문항 완전판 데모)</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* slider style */
-    input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:18px; height:18px; border-radius:9999px; background:#111; cursor:pointer; }
-    input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:9999px; background:linear-gradient(90deg,#ef4444,#22c55e,#3b82f6); }
-    input[type=range]{ appearance:none; height:6px; border-radius:9999px; background:linear-gradient(90deg,#ef4444,#22c55e,#3b82f6); }
-    input[type=range]::-moz-range-thumb{ width:18px; height:18px; border-radius:9999px; background:#111; border:none; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>COLORGOCHI Intro</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body, html {
+    width:100%; 
+    height:100%;
+    overflow:hidden;
+    background:#000;
+  }
+
+  /* 무대: 핸드폰 전체 화면 */
+  .stage{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    height:100svh; /* 모바일 주소창 제외 */
+    overflow:hidden;
+    background:#000;
+    touch-action:manipulation;
+    -webkit-user-select:none; user-select:none;
+  }
+
+  /* 배경 이미지 */
+  .bg{
+    position:absolute; 
+    inset:0;
+    width:100%; 
+    height:100%;
+    object-fit:cover;
+    image-rendering:pixelated;
+    z-index:0; 
+    display:block;
+  }
+
+  /* 공통 레이어 스타일 */
+  .layer{
+    position:absolute; 
+    left:50%;
+    transform:translate(-50%, -50%);
+    opacity:0;
+    image-rendering:pixelated;
+    z-index:1;
+    will-change:transform, opacity;
+  }
+  
+  .layer img{ 
+    display:block; 
+    width:100%; 
+    height:auto; 
+  }
+
+  /* 타이틀 위치 */
+  .title {
+    top:46%;
+    width:65%;
+    max-width:320px;
+  }
+
+  /* 서브타이틀 위치 */
+  .stitle {
+    top:53%;
+    width:58%;
+    max-width:280px;
+  }
+
+  /* START 버튼 */
+  .start{
+    position:absolute; 
+    left:50%;
+    transform:translate(-50%, -50%);
+    top:83%;
+    z-index:3;
+    width:62%;
+    max-width:300px;
+    cursor:pointer;
+    opacity:0;
+    transition:transform 0.15s ease;
+  }
+  
+  .start img{
+    display:block;
+    width:100%;
+    height:auto;
+    image-rendering:pixelated;
+  }
+  
+  .start:active{
+    transform:translate(-50%, -50%) scale(0.96);
+  }
+
+  /* 아래에서 위로 올라오면서 페이드인 애니메이션 */
+  @keyframes fadeUpSlow {
+    from { 
+      opacity:0; 
+      transform:translate(-50%, calc(-50% + 30px)); 
+    }
+    to { 
+      opacity:1; 
+      transform:translate(-50%, -50%); 
+    }
+  }
+
+  /* 버튼 등장 애니메이션 */
+  @keyframes fadeUpButton {
+    from { 
+      opacity:0; 
+      transform:translate(-50%, calc(-50% + 20px)); 
+    }
+    to { 
+      opacity:1; 
+      transform:translate(-50%, -50%); 
+    }
+  }
+
+  .show-title { 
+    animation:fadeUpSlow 1s ease-out forwards; 
+  }
+  
+  .show-stitle { 
+    animation:fadeUpSlow 1s ease-out forwards; 
+  }
+  
+  .show-btn { 
+    animation:fadeUpButton 0.8s ease-out forwards; 
+  }
+
+  /* 모션 줄이기 설정 */
+  @media (prefers-reduced-motion: reduce){
+    .layer, .start { 
+      opacity:1 !important; 
+      animation:none !important; 
+      transform:translate(-50%, -50%) !important;
+    }
+  }
+
+  /* 가로가 긴 화면 (데스크톱, 태블릿 가로모드) */
+  @media (min-aspect-ratio: 1/1) {
+    .stage {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+  }
+
+  /* 작은 화면 */
+  @media (max-height: 700px) {
+    .title { top:44%; width:68%; }
+    .stitle { top:51%; width:60%; }
+    .start { top:80%; width:65%; }
+  }
+
+  /* 매우 작은 화면 */
+  @media (max-height: 600px) {
+    .title { top:42%; width:70%; }
+    .stitle { top:49%; width:62%; }
+    .start { top:77%; width:68%; }
+  }
+</style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900">
-  <header class="max-w-5xl mx-auto px-6 py-10">
-    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">DevHex – 내 영혼의 색 (10문항 데모)</h1>
-    <p class="mt-3 text-slate-600">슬라이더(5) + 객관식(5)으로 응답하면 <span class="font-semibold">RGB → HEX</span>로 고유 색이 생성됩니다. (실서비스용 기초 구조)</p>
-  </header>
+<body>
+  <main class="stage" id="stage">
+    <!-- 배경 -->
+    <img class="bg" id="bg" src="bg.png" alt="배경"
+         onerror="console.error('bg.png 로드 실패')" />
 
-  <main class="max-w-5xl mx-auto px-6 grid lg:grid-cols-2 gap-8 pb-20">
-    <!-- Left: Form -->
-    <section class="space-y-8 order-2 lg:order-1">
-      <!-- SLIDERS -->
-      <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-lg font-bold">A. 슬라이드형 (5)</h2>
-        <p class="text-sm text-slate-500 mb-4">각 문항을 0~100 사이에서 조절하세요.</p>
+    <!-- 타이틀 -->
+    <div class="layer title" id="title">
+      <img src="title.png" alt="COLORGOCHI 타이틀"
+           onerror="console.error('title.png 로드 실패')" />
+    </div>
 
-        <!-- Q1 -->
-        <div class="py-4 border-t first:border-t-0">
-          <label for="q1" class="block text-sm font-semibold text-slate-700">Q1. 감정 표현: 숨김 🤐 ↔ 솔직 💬</label>
-          <div class="mt-3 flex items-center gap-3">
-            <span class="text-xs text-slate-500">숨김</span>
-            <input id="q1" type="range" min="0" max="100" value="50" class="flex-1" />
-            <span class="text-xs text-slate-500">솔직</span>
-          </div>
-          <div class="mt-1 text-right text-xs text-slate-500"><span id="q1v">50</span>/100</div>
-        </div>
+    <!-- 서브타이틀 -->
+    <div class="layer stitle" id="stitle">
+      <img src="stitle.png" alt="나만의 색을 가진 컬러고치 만들기"
+           onerror="console.error('stitle.png 로드 실패')" />
+    </div>
 
-        <!-- Q2 -->
-        <div class="py-4 border-t">
-          <label for="q2" class="block text-sm font-semibold text-slate-700">Q2. 생활 방식: 계획적 📅 ↔ 즉흥적 🎲</label>
-          <div class="mt-3 flex items-center gap-3">
-            <span class="text-xs text-slate-500">계획적</span>
-            <input id="q2" type="range" min="0" max="100" value="50" class="flex-1" />
-            <span class="text-xs text-slate-500">즉흥적</span>
-          </div>
-          <div class="mt-1 text-right text-xs text-slate-500"><span id="q2v">50</span>/100</div>
-        </div>
-
-        <!-- Q3 -->
-        <div class="py-4 border-t">
-          <label for="q3" class="block text-sm font-semibold text-slate-700">Q3. 에너지 원천: 혼자일 때 🌙 ↔ 사람들과 🌞</label>
-          <div class="mt-3 flex items-center gap-3">
-            <span class="text-xs text-slate-500">혼자</span>
-            <input id="q3" type="range" min="0" max="100" value="50" class="flex-1" />
-            <span class="text-xs text-slate-500">사람들</span>
-          </div>
-          <div class="mt-1 text-right text-xs text-slate-500"><span id="q3v">50</span>/100</div>
-        </div>
-
-        <!-- Q4 -->
-        <div class="py-4 border-t">
-          <label for="q4" class="block text-sm font-semibold text-slate-700">Q4. 사고 초점: 디테일 🔍 ↔ 큰 그림 🌍</label>
-          <div class="mt-3 flex items-center gap-3">
-            <span class="text-xs text-slate-500">디테일</span>
-            <input id="q4" type="range" min="0" max="100" value="50" class="flex-1" />
-            <span class="text-xs text-slate-500">큰 그림</span>
-          </div>
-          <div class="mt-1 text-right text-xs text-slate-500"><span id="q4v">50</span>/100</div>
-        </div>
-
-        <!-- Q5 -->
-        <div class="py-4 border-t">
-          <label for="q5" class="block text-sm font-semibold text-slate-700">Q5. 위험 성향: 회피 ⛔ ↔ 도전 🚀</label>
-          <div class="mt-3 flex items-center gap-3">
-            <span class="text-xs text-slate-500">회피</span>
-            <input id="q5" type="range" min="0" max="100" value="50" class="flex-1" />
-            <span class="text-xs text-slate-500">도전</span>
-          </div>
-          <div class="mt-1 text-right text-xs text-slate-500"><span id="q5v">50</span>/100</div>
-        </div>
-      </div>
-
-      <!-- MCQ -->
-      <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-lg font-bold">B. 객관식 (4지선다 × 5)</h2>
-        <p class="text-sm text-slate-500 mb-4">한 문항당 하나씩 선택하세요.</p>
-
-        <!-- helper: radio group builder uses data-r/g/b for weights -->
-        <fieldset class="py-4">
-          <legend class="block text-sm font-semibold text-slate-700 mb-2">Q6. 좋아하는 계절은?</legend>
-          <div class="grid sm:grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 p-2 border rounded-lg">
-              <input type="radio" name="q6" data-r="10" data-g="20" data-b="0" /> 봄
-            </label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg">
-              <input type="radio" name="q6" data-r="0" data-g="0" data-b="30" /> 여름
-            </label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg">
-              <input type="radio" name="q6" data-r="20" data-g="10" data-b="0" /> 가을
-            </label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg">
-              <input type="radio" name="q6" data-r="0" data-g="10" data-b="20" /> 겨울
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset class="py-4 border-t">
-          <legend class="block text-sm font-semibold text-slate-700 mb-2">Q7. 스트레스를 풀 때 나는…</legend>
-          <div class="grid sm:grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q7" data-r="20" data-g="10" data-b="0"/> 친구들과 수다</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q7" data-r="0" data-g="0" data-b="30"/> 음악 감상</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q7" data-r="10" data-g="0" data-b="20"/> 혼자 사색</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q7" data-r="30" data-g="0" data-b="0"/> 운동</label>
-          </div>
-        </fieldset>
-
-        <fieldset class="py-4 border-t">
-          <legend class="block text-sm font-semibold text-slate-700 mb-2">Q8. 가장 끌리는 풍경은?</legend>
-          <div class="grid sm:grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q8" data-r="0" data-g="0" data-b="30"/> 바다</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q8" data-r="0" data-g="30" data-b="0"/> 숲</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q8" data-r="30" data-g="0" data-b="0"/> 노을</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q8" data-r="10" data-g="10" data-b="10"/> 맑은 하늘</label>
-          </div>
-        </fieldset>
-
-        <fieldset class="py-4 border-t">
-          <legend class="block text-sm font-semibold text-slate-700 mb-2">Q9. 사람들이 나를 어떻게 보길 원하나요?</legend>
-          <div class="grid sm:grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q9" data-r="20" data-g="20" data-b="0"/> 밝고 활발하게</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q9" data-r="0" data-g="0" data-b="30"/> 신뢰감 있게</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q9" data-r="15" data-g="0" data-b="15"/> 창의적·개성 있게</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q9" data-r="20" data-g="10" data-b="0"/> 따뜻하고 다정하게</label>
-          </div>
-        </fieldset>
-
-        <fieldset class="py-4 border-t">
-          <legend class="block text-sm font-semibold text-slate-700 mb-2">Q10. 이상적인 하루는?</legend>
-          <div class="grid sm:grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q10" data-r="30" data-g="0" data-b="0"/> 활력 넘치는 하루</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q10" data-r="0" data-g="30" data-b="0"/> 평화로운 하루</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q10" data-r="15" data-g="0" data-b="15"/> 영감 가득한 하루</label>
-            <label class="flex items-center gap-2 p-2 border rounded-lg"><input type="radio" name="q10" data-r="0" data-g="10" data-b="20"/> 차분히 정리되는 하루</label>
-          </div>
-        </fieldset>
-
-        <div class="mt-4 flex flex-wrap gap-3">
-          <button id="resetBtn" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium shadow">초기화</button>
-          <button id="randomBtn" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-medium shadow">랜덤</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Right: Result -->
-    <aside class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4 lg:sticky lg:top-6 h-fit order-1 lg:order-2">
-      <div>
-        <h2 class="text-xl font-bold">결과</h2>
-        <p class="text-slate-500 text-sm">응답에 따라 실시간으로 색상이 생성됩니다.</p>
-      </div>
-
-      <div id="swatch" class="h-48 w-full rounded-2xl shadow-inner border border-slate-200"></div>
-
-      <div class="grid grid-cols-3 gap-3 text-sm">
-        <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-xs text-slate-500">R</div><div id="rVal" class="font-semibold">0</div></div>
-        <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-xs text-slate-500">G</div><div id="gVal" class="font-semibold">0</div></div>
-        <div class="p-3 rounded-xl bg-slate-50 border"><div class="text-xs text-slate-500">B</div><div id="bVal" class="font-semibold">0</div></div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="text-lg font-mono font-semibold" id="hex">#000000</div>
-        <button id="copyBtn" class="px-3 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-black">HEX 복사</button>
-      </div>
-
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-semibold text-slate-700">성격 키워드</h3>
-          <div class="text-xs text-slate-500">완료율: <span id="progress">50</span>%</div>
-        </div>
-        <div id="keywords" class="flex flex-wrap gap-2 text-xs"></div>
-      </div>
-
-      <p class="text-xs text-slate-500 mt-2">※ 데모는 클라이언트 계산으로 동작합니다. 실제 서비스에서는 가중치 보정, 응답 저장(DB), 공유 이미지(OG) 등을 추가하세요.</p>
-    </aside>
+    <!-- START 버튼 -->
+    <a class="start" id="start" href="#start" aria-label="게임 시작">
+      <img src="start.png" alt="START"
+           onerror="console.error('start.png 로드 실패')" />
+    </a>
   </main>
 
-  <footer class="max-w-5xl mx-auto px-6 pb-12 text-center text-xs text-slate-500">© DevHex Demo – Color Psychology Test</footer>
+<script>
+  const title = document.getElementById('title');
+  const stitle = document.getElementById('stitle');
+  const start = document.getElementById('start');
 
-  <script>
-    // ===== SLIDERS =====
-    const sliders = [1,2,3,4,5].map(i=>({
-      input: document.getElementById(`q${i}`),
-      view: document.getElementById(`q${i}v`)
-    }));
+  // 순차적 애니메이션
+  setTimeout(() => {
+    title.classList.add('show-title');
+  }, 300);
 
-    // ===== RADIO GROUPS (MCQ) =====
-    const mcqNames = ['q6','q7','q8','q9','q10'];
+  setTimeout(() => {
+    stitle.classList.add('show-stitle');
+  }, 700);
 
-    const swatch = document.getElementById('swatch');
-    const hexEl = document.getElementById('hex');
-    const rEl = document.getElementById('rVal');
-    const gEl = document.getElementById('gVal');
-    const bEl = document.getElementById('bVal');
-    const copyBtn = document.getElementById('copyBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const randomBtn = document.getElementById('randomBtn');
-    const keywordsEl = document.getElementById('keywords');
-    const progressEl = document.getElementById('progress');
+  setTimeout(() => {
+    start.classList.add('show-btn');
+  }, 1200);
 
-    const clamp255 = (x) => Math.max(0, Math.min(255, x));
-    const toHex = (n) => n.toString(16).padStart(2, '0');
+  // 버튼 클릭 효과
+  let isPressed = false;
 
-    function progress() {
-      // 5 sliders are always answered; count selected radios
-      const answeredMCQ = mcqNames.reduce((acc,name)=> acc + (document.querySelector(`input[name="${name}"]:checked`)?1:0), 0);
-      const pct = Math.round(((5 + answeredMCQ) / 10) * 100);
-      progressEl.textContent = pct;
+  const pressButton = () => {
+    if (!isPressed) {
+      isPressed = true;
+      start.style.transform = 'translate(-50%, -50%) scale(0.96)';
     }
+  };
 
-    function computeRGB() {
-      // Sliders
-      const v = sliders.map(s=> Number(s.input.value));
-      // v[0]=Q1 숨김↔솔직, v[1]=Q2 계획↔즉흥, v[2]=Q3 혼자↔사람, v[3]=Q4 디테일↔큰그림, v[4]=Q5 회피↔도전
-      let R=0, G=0, B=0;
-
-      // Q1: R += v1; B += (100-v1)
-      R += v[0];
-      B += (100 - v[0]);
-
-      // Q2: G += (100-v2); R += v2
-      G += (100 - v[1]);
-      R += v[1];
-
-      // Q3: B += (100-v3); R += v3
-      B += (100 - v[2]);
-      R += v[2];
-
-      // Q4: G += (100-v4); R += 0.5*v4; B += 0.5*v4
-      G += (100 - v[3]);
-      R += 0.5 * v[3];
-      B += 0.5 * v[3];
-
-      // Q5: G += (100-v5); R += v5
-      G += (100 - v[4]);
-      R += v[4];
-
-      // MCQ add-ons
-      mcqNames.forEach(name=>{
-        const sel = document.querySelector(`input[name="${name}"]:checked`);
-        if(!sel) return;
-        R += Number(sel.dataset.r||0);
-        G += Number(sel.dataset.g||0);
-        B += Number(sel.dataset.b||0);
-      });
-
-      // Normalize: scale by max channel to 255 (preserves hue, maximizes vividness)
-      const maxVal = Math.max(R, G, B, 1);
-      const scale = 255 / maxVal;
-      R = Math.round(clamp255(R * scale));
-      G = Math.round(clamp255(G * scale));
-      B = Math.round(clamp255(B * scale));
-
-      return { R, G, B };
+  const releaseButton = () => {
+    if (isPressed) {
+      isPressed = false;
+      start.style.transform = 'translate(-50%, -50%) scale(1)';
     }
+  };
 
-    function render() {
-      sliders.forEach(s=> s.view.textContent = s.input.value);
-      const { R, G, B } = computeRGB();
-      const hex = `#${toHex(R)}${toHex(G)}${toHex(B)}`.toUpperCase();
-      swatch.style.backgroundColor = hex;
-      hexEl.textContent = hex;
-      rEl.textContent = R; gEl.textContent = G; bEl.textContent = B;
+  start.addEventListener('mousedown', pressButton);
+  document.addEventListener('mouseup', releaseButton);
+  start.addEventListener('touchstart', pressButton, {passive: true});
+  document.addEventListener('touchend', releaseButton, {passive: true});
 
-      // keywords by channel ranking
-      const channels = [
-        { k: '에너지', v: R, alt: ['열정','도전'] },
-        { k: '안정', v: G, alt: ['균형','친화'] },
-        { k: '차분', v: B, alt: ['신뢰','사색'] },
-      ].sort((a,b)=>b.v-a.v);
-
-      keywordsEl.innerHTML = '';
-      const pills = [channels[0].k, channels[1].alt[0], channels[2].alt[1]];
-      pills.forEach(t=>{
-        const span = document.createElement('span');
-        span.className = 'px-2.5 py-1 rounded-full bg-slate-100 border text-slate-700';
-        span.textContent = t;
-        keywordsEl.appendChild(span);
-      });
-
-      progress();
-    }
-
-    // events
-    sliders.forEach(s=> s.input.addEventListener('input', render));
-    mcqNames.forEach(name=>{
-      document.querySelectorAll(`input[name="${name}"]`).forEach(r=> r.addEventListener('change', render));
-    });
-
-    copyBtn.addEventListener('click', async ()=>{
-      try{
-        await navigator.clipboard.writeText(hexEl.textContent);
-        copyBtn.textContent = '복사됨!';
-        setTimeout(()=> copyBtn.textContent = 'HEX 복사', 1200);
-      }catch(e){ alert('복사에 실패했어요.'); }
-    });
-
-    resetBtn.addEventListener('click', ()=>{
-      sliders.forEach(s=> s.input.value = 50);
-      mcqNames.forEach(name=>{
-        document.querySelectorAll(`input[name="${name}"]`).forEach(r=> r.checked=false);
-      });
-      render();
-    });
-
-    randomBtn.addEventListener('click', ()=>{
-      sliders.forEach(s=> s.input.value = Math.floor(Math.random()*101));
-      mcqNames.forEach(name=>{
-        const opts = Array.from(document.querySelectorAll(`input[name="${name}"]`));
-        const pick = opts[Math.floor(Math.random()*opts.length)];
-        opts.forEach(o=> o.checked = false);
-        if(pick) pick.checked = true;
-      });
-      render();
-    });
-
-    // initial render
-    render();
-  </script>
+  start.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log('START 클릭!');
+    // 다음 화면으로 이동
+  });
+</script>
 </body>
 </html>
